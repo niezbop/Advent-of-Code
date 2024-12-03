@@ -5,7 +5,7 @@ args = sys.argv[1:]
 source_path = args[0]
 
 if not source_path:
-    raise ValueError("No source file give")
+    raise ValueError("No source file given")
 if not os.path.isfile(source_path):
     raise ValueError(f"No file found at {source_path}")
 
