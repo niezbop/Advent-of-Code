@@ -176,6 +176,7 @@ def recursive_region_fits?(board, shapes, visualize_board)
 end
 
 regions_that_fit = regions.select do |region|
+  # region[:shapes].map(&:footprint).sum <= region[:width] * region[:length]
   region_fits?(visualize_output, **region)
 end.count
 puts regions_that_fit
