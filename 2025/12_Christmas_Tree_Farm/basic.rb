@@ -142,6 +142,9 @@ class Board
 end
 
 def region_fits?(visualize_board = false, width:, length:, shapes:)
+  shapes_width = shapes[0].width
+  shapes_length = shapes[0].length
+  return true if (width / shapes_width) * (length/shapes_length) >= shapes.count
   return false if shapes.map(&:footprint).sum > width * length
   return recursive_region_fits?(
     Board.new(width, length),
