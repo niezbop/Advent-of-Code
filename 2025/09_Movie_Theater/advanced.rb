@@ -24,8 +24,8 @@ class Rectangle
   def area; ((x0-x1).abs + 1) * ((y0-y1) + 1).abs; end
 
   def contains?(x,y)
-    return (self.left <= x and self.right >= x and
-            self.top <= y and self.bottom >= y)
+    return (self.left < x and self.right > x and
+            self.top < y and self.bottom > y)
   end
 
   def is_inside?(other)
@@ -70,7 +70,8 @@ tiles.each_with_index do |(x0,y0), i|
 end
 
 def print_board(rectangle_colors = {}, refresh = false)
-  board = BOARD.dup
+  board = []
+  BOARD.each {|row| board << row.dup }
   rectangle_colors.each do |rectangle, color|
     (rectangle.left..rectangle.right).each do |x|
       (rectangle.top..rectangle.bottom).each do |y|
@@ -87,20 +88,31 @@ rectangles = tiles.each_with_index.map do |(x0, y0), i|
   end
 end.flatten
 
+edges = tiles.each_with_index.map do |tile, i|
+  next_tile = tiles[(i+1)%tiles.size]
+  [tile, next_tile]
+end
+
 max_area = -1
 best_rectangle = nil
 
-rectangles.each_with_index do |r0, i0|
-  next if r0.area <= max_area
-  next if rectangles.each_with_index.any? do|r1,i1|
-    next false if i0 == i1
-
-    r0.overlaps?(r1) and !(r0.is_inside?(r1) or r1.is_inside?(r0))
+rectangles.each_with_index do |r|
+  next if r.area <= max_area
+  next if edges.any? do |(x0,y0), (x1,y1)|
+    if x0 == x1
+      y_min, y_max = [y0, y1].sort
+      next false if x0 <= r.left or x0 >= r.right
+      next ((y_min <= r.top and y_max > r.top) or
+            (y_min < r.bottom and y_max >= r.bottom))
+    else
+      x_min, x_max = [x0, x1].sort
+      next false if y0 <= r.top or y0 >= r.bottom
+      next ((x_min <= r.left and x_max > r.left) or
+            (x_min < r.right and x_max >= r.right))
+    end
   end
-  max_area = r0.area
-  best_rectangle = r0
+  max_area = r.area
+  best_rectangle = r
 end
-
-print_board({best_rectangle => :green})
 
 puts max_area
