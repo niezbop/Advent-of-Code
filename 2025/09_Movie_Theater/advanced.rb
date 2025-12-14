@@ -2,14 +2,8 @@ require 'colored2'
 input_file = ARGV[0]
 visualize = ARGV.include?('-v') or ARGV.include?('--visualize')
 
-actual_tiles = File.readlines(input_file).map do |line|
+tiles = File.readlines(input_file).map do |line|
   line.strip.split(',').map(&:to_i)
-end
-
-x_sorted = actual_tiles.map(&:first).sort
-y_sorted = actual_tiles.map(&:last).sort
-tiles = actual_tiles.map do |x,y|
-  [x_sorted.index(x), y_sorted.index(y) ]
 end
 
 class Rectangle
@@ -100,15 +94,10 @@ edges = tiles.each_with_index.map do |tile, i|
 end
 
 max_area = -1
+best_rectangle = nil
 
 rectangles.each_with_index do |r|
-  actual_area = Rectangle.new(
-    x_sorted[r.left],
-    y_sorted[r.top],
-    x_sorted[r.right],
-    y_sorted[r.bottom]
-  ).area
-  next if actual_area <= max_area
+  next if r.area <= max_area
   next if edges.any? do |(x0,y0), (x1,y1)|
     if x0 == x1
       y_min, y_max = [y0, y1].sort
@@ -122,7 +111,8 @@ rectangles.each_with_index do |r|
             (x_min < r.right and x_max >= r.right))
     end
   end
-  max_area = actual_area
+  max_area = r.area
+  best_rectangle = r
 end
 
 puts max_area
